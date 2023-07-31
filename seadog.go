@@ -1,24 +1,52 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	apiKey := ""
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	apiKey := os.Getenv("MENDABLE_API_KEY")
 
 	// Parse command-line arguments
 	cmd := flag.String("cmd", "", "Command to execute")
+
+	// if the user types -h or --help or help, print the help menu
+	// help := flag.String("h", "", "help")
+	help := flag.Bool("h", false, "help")
 	flag.Parse()
 
-	// Execute the specified command
+	// add help case as -h or --help or help
+	if *help == true {
+		fmt.Println("Usage: go run seadog.go [command] [arguments]")
+		fmt.Println("Commands:")
+		fmt.Println("  -cmd [arguments] - Command followed by argument to execute")
+		fmt.Println("  -h - help")
+		// Arguemnts commands
+		fmt.Println("Arguments:")
+		fmt.Println("  ask - Ask a question")
+		fmt.Println("  ingest - Ingest data")
+
+		// Exit the program
+		os.Exit(0)
+	}
+
 	switch *cmd {
 	case "ask":
 		response, err := newConversation(apiKey)
@@ -31,99 +59,126 @@ func main() {
 		// Get the conversation_id from the response
 		conversationID := response["conversation_id"]
 
-		// get the question from the command line it will be everything after the
-		// first argument
-		question := os.Args[3:]
-		if len(question) == 0 {
-			fmt.Fprintln(os.Stderr, "question is required")
-			os.Exit(1)
+		// create a scanner to read user input
+		scanner := bufio.NewScanner(os.Stdin)
+
+		// loop until exit condition is met
+		for {
+			// get the question from the user
+			fmt.Print("Ask a question (type 'quit' to exit): ")
+			scanner.Scan()
+			questionString := scanner.Text()
+
+			// check if user wants to exit
+			if questionString == "quit" {
+				break
+			}
+
+			url := "https://api.mendable.ai/v0/mendableChat"
+
+			data := map[string]interface{}{
+				"api_key":         apiKey,
+				"question":        questionString,
+				"history":         []interface{}{},
+				"conversation_id": conversationID,
+				"shouldStream":    false,
+			}
+
+			payload, err := json.Marshal(data)
+			if err != nil {
+				panic(err)
+			}
+
+			req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
+			if err != nil {
+				panic(err)
+			}
+
+			req.Header.Set("Accept", "text/event-stream")
+			req.Header.Set("Content-Type", "application/json")
+
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				panic(err)
+			}
+			defer resp.Body.Close()
+
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				panic(err)
+			}
+			// store the body in a strings
+			bodyString := string(body)
+
+			// fmt.Println(bodyString)
+
+			// get the "answer" from the body
+			answer := strings.Split(bodyString, "answer")
+			// we will get just the "text" from the answer and store it into an array
+			text := strings.Split(answer[1], ":{\"text\":")
+
+			// split the array at the "
+
+			// create a string from the array
+			textString := strings.Join(text, " ")
+
+			// print type of text debugging lol
+			// fmt.Println(reflect.TypeOf(text))
+
+			// // // print the answer
+			// fmt.Println(textString)
+
+			// remove the " quotation marks from the string
+			textString = strings.ReplaceAll(textString, "\"", "")
+
+			// remove the } from the string
+			textString = strings.ReplaceAll(textString, "}", "")
+
+			// drop/replace everything after the "soources" in the string (i have no clue wtf I am doin XD)
+			textString = strings.Split(textString, ",sources")[0]
+
+			// Replace special characters with empty string
+			textString = strings.ReplaceAll(textString, "\\n", "\n")
+
+			// print the answer
+			fmt.Println(textString)
 		}
-		questionString := strings.Join(question, " ")
-		url := "https://api.mendable.ai/v0/mendableChat"
-
-		data := map[string]interface{}{
-			"api_key":         apiKey,
-			"question":        questionString,
-			"history":         []interface{}{},
-			"conversation_id": conversationID,
-			"shouldStream":    false,
-		}
-
-		payload, err := json.Marshal(data)
-		if err != nil {
-			panic(err)
-		}
-
-		req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
-		if err != nil {
-			panic(err)
-		}
-
-		req.Header.Set("Accept", "text/event-stream")
-		req.Header.Set("Content-Type", "application/json")
-
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			panic(err)
-		}
-		defer resp.Body.Close()
-
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			panic(err)
-		}
-
-		// fmt.Println(reflect.TypeOf(body))
-
-		// store the body in a strings
-		bodyString := string(body)
-
-		// fmt.Println(bodyString)
-
-		// get the "answer" from the body
-		answer := strings.Split(bodyString, "answer")
-		// we will get just the "text" from the answer and store it into an array
-		text := strings.Split(answer[1], ":{\"text\":")
-
-		// split the array at the "
-
-		// create a string from the array
-		textString := strings.Join(text, " ")
-
-		// print type of text
-		// fmt.Println(reflect.TypeOf(text))
-
-		// // // print the answer
-		// fmt.Println(textString)
-
-		// remove the " quotation marks from the string
-		textString = strings.ReplaceAll(textString, "\"", "")
-
-		// remove the } from the string
-		textString = strings.ReplaceAll(textString, "}", "")
-
-		// drop/replace everything after the "soources" in the string (i have no clue wtf I am doin XD)
-		textString = strings.Split(textString, ",sources")[0]
-
-		// print the answer
-
-		fmt.Println(textString)
 
 	case "ingest":
-		dataSource := os.Args[3]
-		dataType := os.Args[4]
 
-		if dataSource == "" || dataType == "" {
-			fmt.Fprintln(os.Stderr, "url and Type are required")
-			os.Exit(1)
+		scanner := bufio.NewScanner(os.Stdin)
+
+		// Loop until exit condition is met
+		for {
+			// get the data source from the user
+			fmt.Print("Enter a data source url (type 'quit' to exit): ")
+			scanner.Scan()
+			dataSource := scanner.Text()
+			if dataSource == "quit" {
+				break
+			}
+			if dataSource == "" {
+				fmt.Fprintln(os.Stderr, "url and type are required")
+				os.Exit(1)
+			}
+			// get type of ingestion from the user
+			fmt.Print("Enter the type of data ingestion (url only for now): ")
+			scanner.Scan()
+			dataType := scanner.Text()
+
+			if dataType == "" {
+				fmt.Fprintln(os.Stderr, "url and type are required")
+				os.Exit(1)
+			}
+			response, err := ingestData(apiKey, dataSource, dataType)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
+			printResponse(response)
+
 		}
-		response, err := ingestData(apiKey, dataSource, dataType)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
-		printResponse(response)
 	default:
 		fmt.Fprintln(os.Stderr, "Invalid command")
 		os.Exit(1)
@@ -188,45 +243,6 @@ func ingestData(apiKey string, dataSource string, dataType string) (map[string]i
 	}
 
 	return response, nil
-}
-
-func chat(apiKey string, question string, history []map[string]string, conversationID float64) (string, error) {
-	url := "https://api.mendable.ai/v0/mendableChat"
-
-	data := map[string]interface{}{
-		"api_key":         apiKey,
-		"question":        question,
-		"history":         history,
-		"conversation_id": conversationID,
-		// "shouldStream":    false,
-	}
-
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		return "", err
-	}
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return "", err
-	}
-
-	// req.Header.Set("Accept", "text/event-stream")
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	return string(body), nil
 }
 
 func printResponse(response map[string]interface{}) {
