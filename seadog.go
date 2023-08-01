@@ -54,15 +54,13 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		// printResponse(response)
 
-		// Get the conversation_id from the response
 		conversationID := response["conversation_id"]
 
-		// create a scanner to read user input
+	
 		scanner := bufio.NewScanner(os.Stdin)
 
-		// loop until exit condition is met
+
 		for {
 			// get the question from the user
 			fmt.Print("Ask a question (type 'quit' to exit): ")
@@ -108,26 +106,20 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			// store the body in a strings
+			// store the body in a string
 			bodyString := string(body)
 
-			// fmt.Println(bodyString)
 
 			// get the "answer" from the body
 			answer := strings.Split(bodyString, "answer")
-			// we will get just the "text" from the answer and store it into an array
-			text := strings.Split(answer[1], ":{\"text\":")
 
-			// split the array at the "
+
+			// i went regex here lmao 
+
+			text := strings.Split(answer[1], ":{\"text\":")
 
 			// create a string from the array
 			textString := strings.Join(text, " ")
-
-			// print type of text debugging lol
-			// fmt.Println(reflect.TypeOf(text))
-
-			// // // print the answer
-			// fmt.Println(textString)
 
 			// remove the " quotation marks from the string
 			textString = strings.ReplaceAll(textString, "\"", "")
@@ -135,7 +127,9 @@ func main() {
 			// remove the } from the string
 			textString = strings.ReplaceAll(textString, "}", "")
 
-			// drop/replace everything after the "soources" in the string (i have no clue wtf I am doin XD)
+			// drop/replace everything after the "sources" in the string (i have no clue wtf I am doin XD)
+			//def want sources eventually just temp solution atm...
+
 			textString = strings.Split(textString, ",sources")[0]
 
 			// Replace special characters with empty string
@@ -149,7 +143,6 @@ func main() {
 
 		scanner := bufio.NewScanner(os.Stdin)
 
-		// Loop until exit condition is met
 		for {
 			// get the data source from the user
 			fmt.Print("Enter a data source url (type 'quit' to exit): ")
