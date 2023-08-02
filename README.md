@@ -34,10 +34,10 @@ git clone https://github.com/AstroWa3l/seadog.git
 ```
 
 2. Create a .env file and add the following variable in it
-
 ```bash
-MENDABLE_API_KEY=YOUR_MENDABLE_API_KEY
+mkdir .env
 ```
+`MENDABLE_API_KEY=YOUR_MENDABLE_API_KEY`
 
 3. Build the executable
 
