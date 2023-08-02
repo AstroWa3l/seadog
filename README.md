@@ -33,13 +33,19 @@ go version
 git clone https://github.com/AstroWa3l/seadog.git
 ```
 
-2. Build the executable
+2. Create a .env file and add the following variable in it
+
+```bash
+MENDABLE_API_KEY=YOUR_MENDABLE_API_KEY
+```
+
+3. Build the executable
 
 ```bash
 go build seadog.go
 ```
 
-3. Run the executable and ask for help to find the commands
+4. Run the executable and ask for help to find the commands
 
 ```bash
 ./seadog -h
