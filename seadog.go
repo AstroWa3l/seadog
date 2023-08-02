@@ -111,10 +111,9 @@ func main() {
 			// store the body in a strings
 			bodyString := string(body)
 
-			// fmt.Println(bodyString)
-
 			// get the "answer" from the body
 			answer := strings.Split(bodyString, "answer")
+
 			// we will get just the "text" from the answer and store it into an array
 			text := strings.Split(answer[1], ":{\"text\":")
 
@@ -122,12 +121,6 @@ func main() {
 
 			// create a string from the array
 			textString := strings.Join(text, " ")
-
-			// print type of text debugging lol
-			// fmt.Println(reflect.TypeOf(text))
-
-			// // // print the answer
-			// fmt.Println(textString)
 
 			// remove the " quotation marks from the string
 			textString = strings.ReplaceAll(textString, "\"", "")
