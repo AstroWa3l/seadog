@@ -54,7 +54,6 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		// printResponse(response)
 
 		// Get the conversation_id from the response
 		conversationID := response["conversation_id"]
@@ -111,27 +110,23 @@ func main() {
 			// store the body in a strings
 			bodyString := string(body)
 
+			// fmt.Println(bodyString)
+
 			// get the "answer" from the body
 			answer := strings.Split(bodyString, "answer")
 
 			// we will get just the "text" from the answer and store it into an array
 			text := strings.Split(answer[1], ":{\"text\":")
 
-			// split the array at the "
-
 			// create a string from the array
 			textString := strings.Join(text, " ")
 
-			// remove the " quotation marks from the string
 			textString = strings.ReplaceAll(textString, "\"", "")
 
-			// remove the } from the string
 			textString = strings.ReplaceAll(textString, "}", "")
 
-			// drop/replace everything after the "soources" in the string (i have no clue wtf I am doin XD)
 			textString = strings.Split(textString, ",sources")[0]
 
-			// Replace special characters with empty string
 			textString = strings.ReplaceAll(textString, "\\n", "\n")
 
 			// print the answer
