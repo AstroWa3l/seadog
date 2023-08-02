@@ -35,7 +35,7 @@ git clone https://github.com/AstroWa3l/seadog.git
 
 2. Create a .env file and add the following variable in it
 ```bash
-mkdir .env
+nano .env
 ```
 `MENDABLE_API_KEY=YOUR_MENDABLE_API_KEY`
 
