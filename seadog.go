@@ -35,8 +35,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-
+	// comment the line below out if you are not using .env file
 	apiKey := os.Getenv("MENDABLE_API_KEY")
+
+	// uncomment the line below and add your api key if you are not using .env file
+	// apiKey := "MENDABLE_API_KEY"
 
 	// Parse command-line arguments
 	cmd := flag.String("cmd", "", "Command to execute")

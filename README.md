@@ -50,3 +50,21 @@ go build seadog.go
 ```bash
 ./seadog -h
 ```
+
+- ***(optional) copy the executable to /usr/local/bin to be able to run it from anywhere***
+
+```bash
+sudo cp seadog /usr/local/bin
+```
+
+- ***If you are using .env file, you need to copy it to /usr/local/bin as well***
+
+```bash
+sudo cp .env /usr/local/bin
+```
+
+***Run the executable from anywhere***
+
+```bash
+seadog -h
+```
