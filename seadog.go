@@ -130,6 +130,11 @@ func main() {
 
 			fmt.Println(result.Answer.Text)
 
+			fmt.Println("Sources:" + "\n" + "--------")
+			for _, source := range result.Sources {
+				fmt.Println(source.Link)
+				fmt.Println()
+			}
 		}
 
 	case "ingest":
