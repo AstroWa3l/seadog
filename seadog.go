@@ -10,10 +10,24 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/joho/godotenv"
 )
+
+type Response struct {
+	Answer struct {
+		Text string `json:"text"`
+	} `json:"answer"`
+	Sources []struct {
+		Content    string `json:"content"`
+		Date       any    `json:"date"`
+		ID         int    `json:"id"`
+		Link       string `json:"link"`
+		SourceName any    `json:"source_name"`
+		Text       string `json:"text"`
+	} `json:"sources"`
+	MessageID int `json:"message_id"`
+}
 
 func main() {
 
@@ -54,6 +68,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		// printResponse(response)
 
 		// Get the conversation_id from the response
 		conversationID := response["conversation_id"]
@@ -107,30 +122,14 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			// store the body in a strings
-			bodyString := string(body)
 
-			// fmt.Println(bodyString)
+			var result Response
+			if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to go struct pointer
+				fmt.Println("Can not unmarshal JSON")
+			}
 
-			// get the "answer" from the body
-			answer := strings.Split(bodyString, "answer")
+			fmt.Println(result.Answer.Text)
 
-			// we will get just the "text" from the answer and store it into an array
-			text := strings.Split(answer[1], ":{\"text\":")
-
-			// create a string from the array
-			textString := strings.Join(text, " ")
-
-			textString = strings.ReplaceAll(textString, "\"", "")
-
-			textString = strings.ReplaceAll(textString, "}", "")
-
-			textString = strings.Split(textString, ",sources")[0]
-
-			textString = strings.ReplaceAll(textString, "\\n", "\n")
-
-			// print the answer
-			fmt.Println(textString)
 		}
 
 	case "ingest":
@@ -241,4 +240,10 @@ func printResponse(response map[string]interface{}) {
 		os.Exit(1)
 	}
 	fmt.Println(string(responseJSON))
+}
+
+// PrettyPrint to print struct in a readable way
+func PrettyPrint(i interface{}) string {
+	s, _ := json.MarshalIndent(i, "", "\t")
+	return string(s)
 }
