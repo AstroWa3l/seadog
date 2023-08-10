@@ -130,13 +130,22 @@ func main() {
 			if err := json.Unmarshal(body, &result); err != nil { // Parse []byte to go struct pointer
 				fmt.Println("Can not unmarshal JSON")
 			}
+			fmt.Println("\n---------------------------------------------------------------------------")
+			fmt.Println("\nQuestion:" + " " + questionString)
 
-			fmt.Println(result.Answer.Text)
+			fmt.Println("\n---------------------------------------------------------------------------")
+			fmt.Println("\nAnswer:" + " " + result.Answer.Text)
+			fmt.Println("\n---------------------------------------------------------------------------")
+			if len(result.Sources) == 0 {
+				fmt.Println("No sources found" + "\n---------------------------------------------------------------------------")
+			} else {
+				fmt.Println("\nSources:")
+				for _, source := range result.Sources {
 
-			fmt.Println("Sources:" + "\n" + "--------")
-			for _, source := range result.Sources {
-				fmt.Println(source.Link)
-				fmt.Println()
+					fmt.Println(source.Link)
+
+				}
+				fmt.Println("\n---------------------------------------------------------------------------")
 			}
 		}
 

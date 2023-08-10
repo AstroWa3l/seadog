@@ -1,8 +1,9 @@
 # seadog
-CLI based AI Chat Bot for SPOs
+CLI AI Chat Bot for SPOs
 
 ## Requirements
 - Go 1.20 or higher
+- [Mendable API Key](https://mendable.ai/)
 
 ### Installing Go on Raspberry Pi4
 If you need to install Go and using a raspberry pi 3 or 4 computer, you can use snap.
