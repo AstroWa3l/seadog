@@ -50,7 +50,7 @@ func main() {
 	flag.Parse()
 
 	// add help case as -h or --help or help
-	if *help == true {
+	if *help {
 		fmt.Println("Usage: go run seadog.go [command] [arguments]")
 		fmt.Println("Commands:")
 		fmt.Println("  -cmd [arguments] - Command followed by argument to execute")
@@ -147,6 +147,48 @@ func main() {
 				}
 				fmt.Println("\n---------------------------------------------------------------------------")
 			}
+
+			// rate the message response
+			fmt.Println("\nWas this answer helpful? Please reply with yes or no:")
+			// get the rating from the user
+			scanner.Scan()
+			rating := scanner.Text()
+
+			ratingValue := 0
+
+			if rating == "yes" {
+				ratingValue = 1
+			} else if rating == "no" {
+				ratingValue = -1
+			}
+
+			// now we can post the rating to the api to better train the model
+			ratingURL := "https://api.mendable.ai/v0/rateMessage"
+			ratingData := map[string]interface{}{
+				"api_key":      apiKey,
+				"rating_value": ratingValue,
+				"message_id":   result.MessageID,
+			}
+
+			ratingPayload, err := json.Marshal(ratingData)
+			if err != nil {
+				panic(err)
+			}
+
+			ratingReq, err := http.NewRequest("POST", ratingURL, bytes.NewBuffer(ratingPayload))
+			if err != nil {
+				panic(err)
+			}
+
+			ratingReq.Header.Set("Content-Type", "application/json")
+
+			ratingClient := &http.Client{}
+			ratingResp, err := ratingClient.Do(ratingReq)
+			if err != nil {
+				panic(err)
+			}
+			defer ratingResp.Body.Close()
+
 		}
 
 	case "ingest":
