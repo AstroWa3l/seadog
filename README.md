@@ -3,7 +3,7 @@ CLI AI Chat Bot for SPOs
 
 ## Requirements
 - Go 1.20 or higher
-- [Mendable API Key](https://mendable.ai/)
+- [Mendable API Key](https://mendable.ai/) (You can sign up for free)
 
 ### Installing Go on Raspberry Pi4
 If you need to install Go and using a raspberry pi 3 or 4 computer, you can use snap.
@@ -40,32 +40,26 @@ nano .env
 ```
 `MENDABLE_API_KEY=YOUR_MENDABLE_API_KEY`
 
-3. Build the executable
+3. Example of how to run the program to start chatting with the bot
+
+(option 1) Run the program using go run
+
+```bash
+go run seadog.go -cmd ask
+```
+
+(option 2) Build the executable and run it
 
 ```bash
 go build seadog.go
+./seadog -cmd ask
 ```
 
-4. Run the executable and ask for help to find the commands
+(option 3) Build the executable and run it from anywhere (Caution when doing this with any executable XD)
 
 ```bash
-./seadog -h
-```
-
-- ***(optional) copy the executable to /usr/local/bin to be able to run it from anywhere***
-
-```bash
+go build seadog.go
 sudo cp seadog /usr/local/bin
-```
-
-- ***If you are using .env file, you need to copy it to /usr/local/bin as well***
-
-```bash
 sudo cp .env /usr/local/bin
-```
-
-***Run the executable from anywhere***
-
-```bash
-seadog -h
+seadog -cmd ask
 ```
