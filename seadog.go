@@ -155,11 +155,16 @@ func main() {
 			rating := scanner.Text()
 
 			ratingValue := 0
+			ratingMessage := ""
 
 			if rating == "yes" {
 				ratingValue = 1
+				ratingMessage = "\nThat is Great to hear, thank you for your feedback!"
+				fmt.Println(ratingMessage)
 			} else if rating == "no" {
 				ratingValue = -1
+				ratingMessage = "\nSorry to hear that, we will try to do better next time!"
+				fmt.Println(ratingMessage)
 			}
 
 			// now we can post the rating to the api to better train the model
@@ -195,19 +200,33 @@ func main() {
 
 		scanner := bufio.NewScanner(os.Stdin)
 
+		allowedTypes := []string{"url", "github", "docusaurus"}
+
 		// Loop until exit condition is met
 		for {
 			// get the data source from the user
 			fmt.Print("Enter a data source url (type 'quit' to exit): ")
 			scanner.Scan()
 			dataSource := scanner.Text()
+
+			// check if user wants to exit
 			if dataSource == "quit" {
 				break
 			}
+			// check if user entered a data source
 			if dataSource == "" {
 				fmt.Fprintln(os.Stderr, "url and type are required")
 				os.Exit(1)
 			}
+
+			// check if user entered a valid url
+			check, err := http.Get(dataSource)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "Invalid url")
+				os.Exit(1)
+			}
+			fmt.Println(check.StatusCode)
+
 			// get type of ingestion from the user
 			fmt.Print("Enter the type of data ingestion (url only for now): ")
 			scanner.Scan()
@@ -217,6 +236,13 @@ func main() {
 				fmt.Fprintln(os.Stderr, "url and type are required")
 				os.Exit(1)
 			}
+
+			// check if user entered a valid type
+			if !contains(allowedTypes, dataType) {
+				fmt.Fprintln(os.Stderr, "Invalid type")
+				os.Exit(1)
+			}
+
 			response, err := ingestData(apiKey, dataSource, dataType)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
@@ -305,4 +331,13 @@ func printResponse(response map[string]interface{}) {
 func PrettyPrint(i interface{}) string {
 	s, _ := json.MarshalIndent(i, "", "\t")
 	return string(s)
+}
+
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+	return false
 }
